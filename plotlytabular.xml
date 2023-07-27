@@ -1,6 +1,6 @@
 <tool name="plotlytabular" id="plotlytabular" version="3.0">
   <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
-  <!--Created by toolfactory@galaxy.org at 27/07/2023 17:52:12 using the Galaxy Tool Factory.-->
+  <!--Created by toolfactory@galaxy.org at 27/07/2023 18:47:26 using the Galaxy Tool Factory.-->
   <description>Plotly plot generator</description>
   <requirements>
     <requirement version="1.5.3" type="package">pandas</requirement>
@@ -78,7 +78,7 @@ elif isColour:
 else:
     fig = px.scatter(df, x=args.xcol, y=args.ycol)
 if args.title:
-    ftitle=dict(text=args.title, font=dict(size=50), automargin=True)
+    ftitle=dict(text=args.title, font=dict(size=50))
     fig.update_layout(title=ftitle)
 for scatter in fig.data:
     scatter['x'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['x']]
@@ -226,7 +226,7 @@ Script::
     else:
         fig = px.scatter(df, x=args.xcol, y=args.ycol)
     if args.title:
-        ftitle=dict(text=args.title, font=dict(size=50), automargin=True)
+        ftitle=dict(text=args.title, font=dict(size=50))
         fig.update_layout(title=ftitle)
     for scatter in fig.data:
         scatter['x'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['x']]
