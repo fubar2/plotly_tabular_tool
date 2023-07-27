@@ -1,0 +1,245 @@
+<tool name="plotlytabular" id="plotlytabular" version="3.0">
+  <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
+  <!--Created by toolfactory@galaxy.org at 27/07/2023 17:52:12 using the Galaxy Tool Factory.-->
+  <description>Plotly plot generator</description>
+  <requirements>
+    <requirement version="1.5.3" type="package">pandas</requirement>
+    <requirement version="5.9.0" type="package">plotly</requirement>
+  </requirements>
+  <stdio>
+    <exit_code range="1:" level="fatal"/>
+  </stdio>
+  <version_command><![CDATA[echo "3.0"]]></version_command>
+  <command><![CDATA[python
+$runme
+--input_tab
+$input_tab
+--htmlout
+$htmlout
+--xcol
+"$xcol"
+--ycol
+"$ycol"
+--colourcol
+"$colourcol"
+--hovercol
+"$hovercol"
+--title
+"$title"
+--header
+"$header"]]></command>
+  <configfiles>
+    <configfile name="runme"><![CDATA[#raw
+
+import argparse
+import sys
+import math
+import plotly.express as px
+import pandas as pd
+# Ross Lazarus July 2023
+# based on various plotly tutorials
+parser = argparse.ArgumentParser()
+a = parser.add_argument
+a('--input_tab',default='')
+a('--header',default='')
+a('--htmlout',default="test_run.html")
+a('--xcol',default='')
+a('--ycol',default='')
+a('--colourcol',default='')
+a('--hovercol',default='')
+a('--title',default='Default plot title')
+args = parser.parse_args()
+df = pd.read_csv(args.input_tab, sep='\t')
+MAXLEN=35
+NCOLS = df.columns.size
+defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
+if len(args.header.strip()) > 0:
+    newcols = args.header.split(',')
+    if len(newcols) == NCOLS:
+        df.columns = newcols
+    else:
+        sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns - using col1,...coln' % (args.header, len(newcols), NCOLS))
+        df.columns = defaultcols
+else:
+    df.columns = defaultcols
+#df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
+isColour = False
+isHover = False
+if len(args.colourcol.strip()) > 0:
+    isColour = True
+if len(args.hovercol.strip()) > 0:
+    isHover = True
+if isHover and isColour:
+    fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
+elif isHover:
+    fig = px.scatter(df, x=args.xcol, y=args.ycol, hover_name=args.hovercol)
+elif isColour:
+    fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol)
+else:
+    fig = px.scatter(df, x=args.xcol, y=args.ycol)
+if args.title:
+    ftitle=dict(text=args.title, font=dict(size=50), automargin=True)
+    fig.update_layout(title=ftitle)
+for scatter in fig.data:
+    scatter['x'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['x']]
+    scatter['y'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['y']]
+    if len(args.colourcol.strip()) == 0:
+        sl = str(scatter['legendgroup'])
+        if len(sl) > MAXLEN:
+            scatter['legendgroup'] = sl[:MAXLEN]
+fig.write_html(args.htmlout)
+
+
+#end raw]]></configfile>
+  </configfiles>
+  <inputs>
+    <param name="input_tab" type="data" optional="false" label="Tabular input file to plot" help="" format="tabular" multiple="false"/>
+    <param name="xcol" type="text" value="col1" label="x axis for plat" help=""/>
+    <param name="ycol" type="text" value="col12" label="y axis for plot" help=""/>
+    <param name="colourcol" type="text" value="col2" label="column containing a groupable variable for colour. Default none." help="Adds a legend so choose wisely "/>
+    <param name="hovercol" type="text" value="col21" label="columname for hover string" help=""/>
+    <param name="title" type="text" value="default title" label="Title for the plot" help="Special characters will probably be escaped so do not use them"/>
+    <param name="header" type="text" value="" label="Use this comma delimited list of column header names for this tabular file. Default is None when col1...coln will be used" help="Default for Galaxy blast outputs with 25 columns. The column names supplied for xcol, ycol, hover and colour MUST match either the supplied list, or if none, col1...coln."/>
+  </inputs>
+  <outputs>
+    <data name="htmlout" format="html" label="htmlout" hidden="false"/>
+  </outputs>
+  <tests>
+    <test>
+      <output name="htmlout" value="htmlout_sample" compare="sim_size" delta="5000"/>
+      <param name="input_tab" value="input_tab_sample"/>
+      <param name="xcol" value="col1"/>
+      <param name="ycol" value="col12"/>
+      <param name="colourcol" value="col2"/>
+      <param name="hovercol" value="col21"/>
+      <param name="title" value="default title"/>
+      <param name="header" value=""/>
+    </test>
+  </tests>
+  <help><![CDATA[
+
+This is a specialised version of a generic tabular file plotter tool plotlytabular
+
+
+
+.. class:: warningmark
+
+NOTE: Long strings in x and y tickmarks WILL BE TRUNCATED if they are too long - ".." is added to indicate truncation - otherwise some plots are squished.
+
+
+
+.. class:: warningmark
+
+NOTE: Blast evalues WILL BE TRANSFORMED using -log10(evalue), so they are scaled in a way that doesn't confuse plotly.express with the tiny values.
+
+
+
+----
+
+
+
+The main reason to run this tool is to have an interactive hover text specified so it appears when hovering over each data point to supply useful information. 
+
+
+
+Assumes you want a hover display for an interactive plot to be informative
+
+
+
+Column names are auto-generated as col1,...coln unless a comma separated list of column names is supplied as the header parameter.
+
+
+
+For example, using a Galaxy blastn output with 25 columns, the following comma delimited string supplied as the "header" parameter will match the names of each column.
+
+   qaccver,saccver,piden,length,mismatch,gapopen,qstart,qend,sstart,send,evalue,bitscore,sallseqid,score,nident,positive,gaps,ppos,qframe,sframe,qseq,sseq,qlen,slen,salltitles
+
+
+
+When a header is supplied, the xcol and other column names must match one of those supplied column names.
+
+So for example, xcol = "qaccver" for the blastn header example rather than xcol = "col1" when no header is supplied.
+
+
+
+Relies on Plotly python code released under the MIT licence: https://github.com/plotly/plotly.py/blob/master/LICENSE.txt
+
+
+
+.. image:: pbsample.png
+
+    :height: 400
+
+    :width: 400
+
+ 
+
+------
+
+
+Script::
+
+    import argparse
+    import sys
+    import math
+    import plotly.express as px
+    import pandas as pd
+    # Ross Lazarus July 2023
+    # based on various plotly tutorials
+    parser = argparse.ArgumentParser()
+    a = parser.add_argument
+    a('--input_tab',default='')
+    a('--header',default='')
+    a('--htmlout',default="test_run.html")
+    a('--xcol',default='')
+    a('--ycol',default='')
+    a('--colourcol',default='')
+    a('--hovercol',default='')
+    a('--title',default='Default plot title')
+    args = parser.parse_args()
+    df = pd.read_csv(args.input_tab, sep='\t')
+    MAXLEN=35
+    NCOLS = df.columns.size
+    defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
+    if len(args.header.strip()) > 0:
+        newcols = args.header.split(',')
+        if len(newcols) == NCOLS:
+            df.columns = newcols
+        else:
+            sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns - using col1,...coln' % (args.header, len(newcols), NCOLS))
+            df.columns = defaultcols
+    else:
+        df.columns = defaultcols
+    #df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
+    isColour = False
+    isHover = False
+    if len(args.colourcol.strip()) > 0:
+        isColour = True
+    if len(args.hovercol.strip()) > 0:
+        isHover = True
+    if isHover and isColour:
+        fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
+    elif isHover:
+        fig = px.scatter(df, x=args.xcol, y=args.ycol, hover_name=args.hovercol)
+    elif isColour:
+        fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol)
+    else:
+        fig = px.scatter(df, x=args.xcol, y=args.ycol)
+    if args.title:
+        ftitle=dict(text=args.title, font=dict(size=50), automargin=True)
+        fig.update_layout(title=ftitle)
+    for scatter in fig.data:
+        scatter['x'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['x']]
+        scatter['y'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['y']]
+        if len(args.colourcol.strip()) == 0:
+            sl = str(scatter['legendgroup'])
+            if len(sl) > MAXLEN:
+                scatter['legendgroup'] = sl[:MAXLEN]
+    fig.write_html(args.htmlout)
+
+]]></help>
+  <citations>
+    <citation type="doi">10.1093/bioinformatics/bts573</citation>
+  </citations>
+</tool>
+
