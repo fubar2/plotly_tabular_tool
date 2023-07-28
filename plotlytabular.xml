@@ -1,6 +1,6 @@
 <tool name="plotlytabular" id="plotlytabular" version="3.0">
   <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
-  <!--Created by toolfactory@galaxy.org at 27/07/2023 18:47:26 using the Galaxy Tool Factory.-->
+  <!--Created by toolfactory@galaxy.org at 28/07/2023 13:36:22 using the Galaxy Tool Factory.-->
   <description>Plotly plot generator</description>
   <requirements>
     <requirement version="1.5.3" type="package">pandas</requirement>
@@ -49,10 +49,17 @@ a('--colourcol',default='')
 a('--hovercol',default='')
 a('--title',default='Default plot title')
 args = parser.parse_args()
+isColour = False
+isHover = False
+if len(args.colourcol.strip()) > 0:
+    isColour = True
+if len(args.hovercol.strip()) > 0:
+    isHover = True
 df = pd.read_csv(args.input_tab, sep='\t')
 MAXLEN=35
 NCOLS = df.columns.size
 defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
+testcols = df.columns
 if len(args.header.strip()) > 0:
     newcols = args.header.split(',')
     if len(newcols) == NCOLS:
@@ -60,15 +67,12 @@ if len(args.header.strip()) > 0:
     else:
         sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns - using col1,...coln' % (args.header, len(newcols), NCOLS))
         df.columns = defaultcols
-else:
-    df.columns = defaultcols
+else: # no header supplied - check for a real one that matches the x and y axis column names
+    colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
+    if not colsok:
+        sys.stderr.write('replacing supplied header %s over existing %s' % (testcols, defaultcols))
+        df.columns = defaultcols
 #df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
-isColour = False
-isHover = False
-if len(args.colourcol.strip()) > 0:
-    isColour = True
-if len(args.hovercol.strip()) > 0:
-    isHover = True
 if isHover and isColour:
     fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
 elif isHover:
@@ -94,11 +98,11 @@ fig.write_html(args.htmlout)
   </configfiles>
   <inputs>
     <param name="input_tab" type="data" optional="false" label="Tabular input file to plot" help="" format="tabular" multiple="false"/>
-    <param name="xcol" type="text" value="col1" label="x axis for plat" help=""/>
-    <param name="ycol" type="text" value="col12" label="y axis for plot" help=""/>
-    <param name="colourcol" type="text" value="col2" label="column containing a groupable variable for colour. Default none." help="Adds a legend so choose wisely "/>
-    <param name="hovercol" type="text" value="col21" label="columname for hover string" help=""/>
-    <param name="title" type="text" value="default title" label="Title for the plot" help="Special characters will probably be escaped so do not use them"/>
+    <param name="xcol" type="text" value="sepal_length" label="x axis for plot" help=""/>
+    <param name="ycol" type="text" value="sepal_width" label="y axis for plot" help=""/>
+    <param name="colourcol" type="text" value="petal_width" label="column containing a groupable variable for colour. Default none." help="Adds a legend so choose wisely "/>
+    <param name="hovercol" type="text" value="species_id" label="columname for hover string" help=""/>
+    <param name="title" type="text" value="Iris data sepal length by sepal width coloured by petal width with species_id as the hover column" label="Title for the plot" help="Special characters will probably be escaped so do not use them"/>
     <param name="header" type="text" value="" label="Use this comma delimited list of column header names for this tabular file. Default is None when col1...coln will be used" help="Default for Galaxy blast outputs with 25 columns. The column names supplied for xcol, ycol, hover and colour MUST match either the supplied list, or if none, col1...coln."/>
   </inputs>
   <outputs>
@@ -108,11 +112,11 @@ fig.write_html(args.htmlout)
     <test>
       <output name="htmlout" value="htmlout_sample" compare="sim_size" delta="5000"/>
       <param name="input_tab" value="input_tab_sample"/>
-      <param name="xcol" value="col1"/>
-      <param name="ycol" value="col12"/>
-      <param name="colourcol" value="col2"/>
-      <param name="hovercol" value="col21"/>
-      <param name="title" value="default title"/>
+      <param name="xcol" value="sepal_length"/>
+      <param name="ycol" value="sepal_width"/>
+      <param name="colourcol" value="petal_width"/>
+      <param name="hovercol" value="species_id"/>
+      <param name="title" value="Iris data sepal length by sepal width coloured by petal width with species_id as the hover column"/>
       <param name="header" value=""/>
     </test>
   </tests>
@@ -197,10 +201,17 @@ Script::
     a('--hovercol',default='')
     a('--title',default='Default plot title')
     args = parser.parse_args()
+    isColour = False
+    isHover = False
+    if len(args.colourcol.strip()) > 0:
+        isColour = True
+    if len(args.hovercol.strip()) > 0:
+        isHover = True
     df = pd.read_csv(args.input_tab, sep='\t')
     MAXLEN=35
     NCOLS = df.columns.size
     defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
+    testcols = df.columns
     if len(args.header.strip()) > 0:
         newcols = args.header.split(',')
         if len(newcols) == NCOLS:
@@ -208,15 +219,12 @@ Script::
         else:
             sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns - using col1,...coln' % (args.header, len(newcols), NCOLS))
             df.columns = defaultcols
-    else:
-        df.columns = defaultcols
+    else: # no header supplied - check for a real one that matches the x and y axis column names
+        colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
+        if not colsok:
+            sys.stderr.write('replacing supplied header %s over existing %s' % (testcols, defaultcols))
+            df.columns = defaultcols
     #df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
-    isColour = False
-    isHover = False
-    if len(args.colourcol.strip()) > 0:
-        isColour = True
-    if len(args.hovercol.strip()) > 0:
-        isHover = True
     if isHover and isColour:
         fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
     elif isHover:
