@@ -1,7 +1,7 @@
 <tool name="plotlytabular" id="plotlytabular" version="3.0">
   <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
-  <!--Created by toolfactory@galaxy.org at 28/07/2023 13:36:22 using the Galaxy Tool Factory.-->
-  <description>Plotly plot generator</description>
+  <!--Created by toolfactory@galaxy.org at 28/07/2023 15:52:28 using the Galaxy Tool Factory.-->
+  <description>Plotly plot generator for any small-ish Galaxy tabular data.</description>
   <requirements>
     <requirement version="1.5.3" type="package">pandas</requirement>
     <requirement version="5.9.0" type="package">plotly</requirement>
@@ -70,7 +70,7 @@ if len(args.header.strip()) > 0:
 else: # no header supplied - check for a real one that matches the x and y axis column names
     colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
     if not colsok:
-        sys.stderr.write('replacing supplied header %s over existing %s' % (testcols, defaultcols))
+        sys.stderr.write('replacing first row of data derived header %s with %s' % (testcols, defaultcols))
         df.columns = defaultcols
 #df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
 if isHover and isColour:
@@ -98,11 +98,11 @@ fig.write_html(args.htmlout)
   </configfiles>
   <inputs>
     <param name="input_tab" type="data" optional="false" label="Tabular input file to plot" help="" format="tabular" multiple="false"/>
-    <param name="xcol" type="text" value="sepal_length" label="x axis for plot" help=""/>
-    <param name="ycol" type="text" value="sepal_width" label="y axis for plot" help=""/>
+    <param name="xcol" type="text" value="sepal_length" label="x axis for plot" help="Use a column name from the header if the file has one, or use one from the list supplied below, or use col1....colN otherwise to select the correct column"/>
+    <param name="ycol" type="text" value="sepal_width" label="y axis for plot" help="Use a column name from the header if the file has one, or use one from the list supplied below, or use col1....colN otherwise to select the correct column"/>
     <param name="colourcol" type="text" value="petal_width" label="column containing a groupable variable for colour. Default none." help="Adds a legend so choose wisely "/>
-    <param name="hovercol" type="text" value="species_id" label="columname for hover string" help=""/>
-    <param name="title" type="text" value="Iris data sepal length by sepal width coloured by petal width with species_id as the hover column" label="Title for the plot" help="Special characters will probably be escaped so do not use them"/>
+    <param name="hovercol" type="text" value="species_id" label="columname for hover string" help="Use a column name from the header if the file has one, or use one from the list supplied below, or use col1....colN otherwise to select the correct column"/>
+    <param name="title" type="text" value="Iris data" label="Title for the plot" help="Special characters will probably be escaped so do not use them"/>
     <param name="header" type="text" value="" label="Use this comma delimited list of column header names for this tabular file. Default is None when col1...coln will be used" help="Default for Galaxy blast outputs with 25 columns. The column names supplied for xcol, ycol, hover and colour MUST match either the supplied list, or if none, col1...coln."/>
   </inputs>
   <outputs>
@@ -116,13 +116,13 @@ fig.write_html(args.htmlout)
       <param name="ycol" value="sepal_width"/>
       <param name="colourcol" value="petal_width"/>
       <param name="hovercol" value="species_id"/>
-      <param name="title" value="Iris data sepal length by sepal width coloured by petal width with species_id as the hover column"/>
+      <param name="title" value="Iris data"/>
       <param name="header" value=""/>
     </test>
   </tests>
   <help><![CDATA[
 
-This is a specialised version of a generic tabular file plotter tool plotlytabular
+This is a generic version of the plotlyblast specific blastn Galaxy search output file plotter.
 
 
 
@@ -134,7 +134,7 @@ NOTE: Long strings in x and y tickmarks WILL BE TRUNCATED if they are too long -
 
 .. class:: warningmark
 
-NOTE: Blast evalues WILL BE TRANSFORMED using -log10(evalue), so they are scaled in a way that doesn't confuse plotly.express with the tiny values.
+NOTE: Columns with very small scientific notation floats will need to be pre-scaled in a way that doesn't confuse plotly.express with their values.
 
 
 
@@ -169,12 +169,6 @@ So for example, xcol = "qaccver" for the blastn header example rather than xcol 
 Relies on Plotly python code released under the MIT licence: https://github.com/plotly/plotly.py/blob/master/LICENSE.txt
 
 
-
-.. image:: pbsample.png
-
-    :height: 400
-
-    :width: 400
 
  
 
@@ -222,7 +216,7 @@ Script::
     else: # no header supplied - check for a real one that matches the x and y axis column names
         colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
         if not colsok:
-            sys.stderr.write('replacing supplied header %s over existing %s' % (testcols, defaultcols))
+            sys.stderr.write('replacing first row of data derived header %s with %s' % (testcols, defaultcols))
             df.columns = defaultcols
     #df['col11'] = [-math.log(x) for x in df['col11']] # convert so large values reflect statistical surprise
     if isHover and isColour:
