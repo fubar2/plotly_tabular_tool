@@ -1,9 +1,11 @@
 # plotly_tabular_tool
 
-![Plotly tabular interactive html output example](plotly_tabular_iris_sample.html)
+## Example interactive plots and more at https://lazarus.name/demo/
+
+![Plotly tabular interactive html output example](plotly_tabular_iris_sample.png)
 
 Galaxy tool to create plotly plots from user selected columns of any Galaxy tabular data.
-Example interactive plots at https://lazarus.name/demo/
+
 
 ![Plotly tabular Galaxy tool form to generate the example](plotlytabular_toolform_sample.png)
 
