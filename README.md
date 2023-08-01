@@ -4,6 +4,7 @@
 
 ### Example interactive plots and more at https://lazarus.name/demo/
 
+#### Non interactive screen grab of the tool output
 ![Plotly tabular interactive html output example](plotly_tabular_iris_sample.png)
 
 Galaxy tool to create plotly interactive hover HTML plots from user selected columns of any Galaxy tabular data.
