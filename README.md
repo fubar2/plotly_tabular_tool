@@ -1,11 +1,11 @@
 # plotly_tabular_tool
 
-![Plotly tabular interactive html output example](https://github.com/fubar2/plotly_tabular_tool/plotly_tabular_iris_sample.html)
+![Plotly tabular interactive html output example](plotly_tabular_iris_sample.html)
 
 Galaxy tool to create plotly plots from user selected columns of any Galaxy tabular data.
 Example interactive plots at https://lazarus.name/demo/
 
-![Plotly tabular Galaxy tool form to generate the example](https://github.com/fubar2/plotly_tabular_tool/plotlytabular_toolform_sample.png)
+![Plotly tabular Galaxy tool form to generate the example](plotlytabular_toolform_sample.png)
 
 Plotly.express makes a lot of clever design decisions.
 Unfortunately, it gets totally confused with evalue columns because it thinks scientific notation like 5.00e-204 is a string or something.
