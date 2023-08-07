@@ -5,10 +5,10 @@
 ### Example interactive plots and more at https://lazarus.name/demo/
 
 #### Input data
-![Plotly blast html output screengrab](iris_data_in_galaxy.png)
+![Iris data](iris_data_in_galaxy.png)
 
 #### Non interactive screen grab of the tool output
-![Plotly blast html output screengrab](plotly_tabular_iris_sample.png)
+![Plotly tabular html output screengrab](plotly_tabular_iris_sample.png)
 
 Galaxy tool to create plotly interactive hover detail HTML plots from user selected columns of any Galaxy tabular data.
 ## Recommended only for low dimensional data - a few thousand rows
