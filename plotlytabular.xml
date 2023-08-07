@@ -1,6 +1,6 @@
 <tool name="plotlytabular" id="plotlytabular" version="3.0">
   <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
-  <!--Created by toolfactory@galaxy.org at 07/08/2023 15:43:09 using the Galaxy Tool Factory.-->
+  <!--Created by toolfactory@galaxy.org at 07/08/2023 18:25:40 using the Galaxy Tool Factory.-->
   <description>Plotly plot generator for Galaxy tabular data.</description>
   <requirements>
     <requirement version="1.5.3" type="package">pandas</requirement>
@@ -33,6 +33,7 @@ $htmlout
 "$outputimagetype"]]></command>
   <configfiles>
     <configfile name="runme"><![CDATA[#raw
+
 
 import argparse
 import shutil
@@ -69,7 +70,7 @@ defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
 testcols = df.columns
 if args.image_type in ['short_html', 'long_html']: # refuse to create browser crashing gob stopper html
     if NROWS > MAXHTMLROWS:
-        sys.stderr.write('#### CRITICAL: As advised on the tool form, 5k+ rows (you supplied %d) in html breaks browsers, so redo the job and change to png format output.' % NROWS)
+        sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): As advised on the tool form, 5k+ rows (you supplied %d) in html breaks browsers, so redo the job but change to png format output.' % NROWS)
         sys.exit(6)
 if len(args.header.strip()) > 0:
     newcols = args.header.split(',')
@@ -77,10 +78,10 @@ if len(args.header.strip()) > 0:
         if (args.xcol in newcols) and (args.ycol in newcols):
             df.columns = newcols
         else:
-            sys.stderr.write('#### xcol and ycol not found in supplied header parameter' % (args.xcol, args.ycol, args.header))
+            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and/or ycol %s not found in supplied header parameter %s' % (args.xcol, args.ycol, args.header))
             sys.exit(4)
     else:
-        sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns' % (args.header, len(newcols), NCOLS))
+        sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns' % (args.header, len(newcols), NCOLS))
         sys.exit(5)
 else: # no header supplied - check for a real one that matches the x and y axis column names
     colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
@@ -92,7 +93,7 @@ else: # no header supplied - check for a real one that matches the x and y axis 
             sys.stderr.write('replacing first row of data derived header %s with %s' % (testcols, defaultcols))
             df.columns = defaultcols
         else:
-            sys.stderr.write('#### xcol %s and ycol %s do not match anything in the file header, supplied header parameter or automatic default column names' % (args.xcol, args.ycol))
+            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and ycol %s do not match anything in the file header, supplied header or automatic default column names %s' % (args.xcol, args.ycol, defaultcols))
 if isHover and isColour:
     fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
 elif isHover:
@@ -125,7 +126,6 @@ else:
     wdth = 1920
     fig.write_image('plotly.png', height=ht, width=wdth)
     shutil.copyfile('plotly.png', args.htmlout)
-
 
 
 #end raw]]></configfile>
@@ -270,7 +270,7 @@ Script::
     testcols = df.columns
     if args.image_type in ['short_html', 'long_html']: # refuse to create browser crashing gob stopper html
         if NROWS > MAXHTMLROWS:
-            sys.stderr.write('#### CRITICAL: As advised on the tool form, 5k+ rows (you supplied %d) in html breaks browsers, so redo the job and change to png format output.' % NROWS)
+            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): As advised on the tool form, 5k+ rows (you supplied %d) in html breaks browsers, so redo the job but change to png format output.' % NROWS)
             sys.exit(6)
     if len(args.header.strip()) > 0:
         newcols = args.header.split(',')
@@ -278,10 +278,10 @@ Script::
             if (args.xcol in newcols) and (args.ycol in newcols):
                 df.columns = newcols
             else:
-                sys.stderr.write('#### xcol and ycol not found in supplied header parameter' % (args.xcol, args.ycol, args.header))
+                sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and/or ycol %s not found in supplied header parameter %s' % (args.xcol, args.ycol, args.header))
                 sys.exit(4)
         else:
-            sys.stderr.write('#### Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns' % (args.header, len(newcols), NCOLS))
+            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns' % (args.header, len(newcols), NCOLS))
             sys.exit(5)
     else: # no header supplied - check for a real one that matches the x and y axis column names
         colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
@@ -293,7 +293,7 @@ Script::
                 sys.stderr.write('replacing first row of data derived header %s with %s' % (testcols, defaultcols))
                 df.columns = defaultcols
             else:
-                sys.stderr.write('#### xcol %s and ycol %s do not match anything in the file header, supplied header parameter or automatic default column names' % (args.xcol, args.ycol))
+                sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and ycol %s do not match anything in the file header, supplied header or automatic default column names %s' % (args.xcol, args.ycol, defaultcols))
     if isHover and isColour:
         fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
     elif isHover:
