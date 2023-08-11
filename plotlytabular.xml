@@ -1,6 +1,6 @@
 <tool name="plotlytabular" id="plotlytabular" version="3.0">
   <!--Source in git at: https://github.com/fubar2/galaxy_tf_overlay-->
-  <!--Created by toolfactory@galaxy.org at 09/08/2023 15:53:34 using the Galaxy Tool Factory.-->
+  <!--Created by toolfactory@galaxy.org at 11/08/2023 17:40:15 using the Galaxy Tool Factory.-->
   <description>Plotly plot generator for Galaxy tabular data.</description>
   <requirements>
     <requirement version="1.5.3" type="package">pandas</requirement>
