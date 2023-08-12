@@ -25,8 +25,13 @@ Note that all columns used for colour (legend) and the x/y axis tickmarks are tr
 A specialised version for 25 column Galaxy blastn search outputs is also available. It uses this code mostly, but adds a default header and auto-transformation of the evalue column -log10(x) to make them more like the bitscore
 
 ## Tool made with the Galaxy ToolFactory: https://github.com/fubar2/galaxy_tf_overlay
-The current release includes this and a generic tabular version, and a java .jar wrapper in a history where the generating
-ToolFactory form can be recreated using the redo button. Editing the tool id will make a new tool, so all other edits to parameters can be
-made and the new tool generated without destroying the original sample.
+
+The current release includes this and a generic tabular version, and a java .jar wrapper in a history where the generating.
+That ToolFactory history can be imported into any ToolFactory instance from [https://github.com/fubar2/plotly_tabular_tool/blob/main/Galaxy-ToolFactory-History-plotlytabulartoolfactoryhistory.tar.gz](https://github.com/fubar2/plotly_tabular_tool/blob/main/Galaxy-ToolFactory-History-plotlytabulartoolfactoryhistory.tar.gz)
+Using that history, the original generating ToolFactory form can be recreated using the redo button.
+Editing the tool id will make a new tool, so all other edits to parameters can be made.
+A new tool can be generated without destroying the original sample by altering the tool_id before execution.
+
+Galaxy Training Network tutorials [ are available here](https://training.galaxyproject.org/training-material/topics/dev/tutorials/tool-generators/tutorial.html)
 
 
