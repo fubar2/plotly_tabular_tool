@@ -1,0 +1,14 @@
+name: plotlytabular
+owner: fubar2
+description: Plotly plot generator for Galaxy tabular data.
+categories:
+- ToolFactory generated tools
+- Graphics
+- Visualisation
+long_description: |
+   Plotly.express in a python script, wrapped by the ToolFactory.
+   Generates arbitrary png scatter plots from Galaxy tabular data.
+   Optionally as html with a hover text if <5000 rows.
+homepage_url: https://github.com/fubar2/plotly_tabular_tool
+synopsis: Plotly plot generator for Galaxy tabular data.
+type: unrestricted
