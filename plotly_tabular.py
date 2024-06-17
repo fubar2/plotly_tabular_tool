@@ -5,7 +5,6 @@
 import argparse
 import shutil
 import sys
-import math
 import plotly.express as px
 import pandas as pd
 # Ross Lazarus July 2023
@@ -16,18 +15,18 @@ a = parser.add_argument
 a('--input_tab',default='')
 a('--header',default='')
 a('--htmlout',default="test_run.html")
-a('--xcol',default='')
-a('--ycol',default='')
-a('--colourcol',default='')
-a('--hovercol',default='')
+a('--xcol',default=3, type=int)
+a('--ycol',default=2, type=int)
+a('--colourcol',default=None, type=int)
+a('--hovercol',default=None, type=int)
 a('--title',default='Default plot title')
-a('--image_type',default='small_png')
+a('--image_type',default='short_html')
 args = parser.parse_args()
 isColour = False
 isHover = False
-if len(args.colourcol.strip()) > 0:
+if args.colourcol > 0:
     isColour = True
-if len(args.hovercol.strip()) > 0:
+if args.hovercol > 0:
     isHover = True
 df = pd.read_csv(args.input_tab, sep='\t')
 MAXLEN=35
@@ -37,45 +36,26 @@ defaultcols = ['col%d' % (x+1) for x in range(NCOLS)]
 testcols = df.columns
 if args.image_type in ['short_html', 'long_html']: # refuse to create browser crashing gob stopper html
     if NROWS > MAXHTMLROWS:
-        sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): As advised on the tool form, 5k+ rows (you supplied %d) in html breaks browsers, so redo the job but change to png format output.' % NROWS)
+        sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): 5k+ rows (you supplied %d) in html breaks browsers, so please rerun the job using png format output.' % NROWS)
         sys.exit(6)
-if len(args.header.strip()) > 0:
-    newcols = args.header.split(',')
-    if len(newcols) == NCOLS:
-        if (args.xcol in newcols) and (args.ycol in newcols):
-            df.columns = newcols
-        else:
-            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and/or ycol %s not found in supplied header parameter %s' % (args.xcol, args.ycol, args.header))
-            sys.exit(4)
-    else:
-        sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): Supplied header %s has %d comma delimited header names - does not match the input tabular file %d columns' % (args.header, len(newcols), NCOLS))
-        sys.exit(5)
-else: # no header supplied - check for a real one that matches the x and y axis column names
-    colsok = (args.xcol in testcols) and (args.ycol in testcols) # if they match, probably ok...should use more code and logic..
-    if colsok:
-        df.columns = testcols # use actual header
-    else:
-        colsok = (args.xcol in defaultcols) and (args.ycol in defaultcols)
-        if colsok:
-            sys.stderr.write('replacing first row of data derived header %s with %s' % (testcols, defaultcols))
-            df.columns = defaultcols
-        else:
-            sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %s and ycol %s do not match anything in the file header, supplied header or automatic default column names %s' % (args.xcol, args.ycol, defaultcols))
+
+if max(args.xcol-1, args.ycol-1) > NCOLS: # out of range
+    sys.stderr.write('## CRITICAL USAGE ERROR (not a bug!): xcol %d or ycol %d are greater than the number of columns found %d' %(args.xcol, args.ycol, NCOLS))
 if isHover and isColour:
-    fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol, hover_name=args.hovercol)
+    fig = px.scatter(df, x=df.columns[args.xcol-1], y=df.columns[args.ycol-1], color=df.columns[args.colourcol-1], hover_name=df.columns[args.hovercol-1])
 elif isHover:
-    fig = px.scatter(df, x=args.xcol, y=args.ycol, hover_name=args.hovercol)
+    fig = px.scatter(df, x=df.columns[args.xcol-1], y=df.columns[args.ycol-1], hover_name=df.columns[args.hovercol-1])
 elif isColour:
-    fig = px.scatter(df, x=args.xcol, y=args.ycol, color=args.colourcol)
+    fig = px.scatter(df, x=df.columns[args.xcol-1], y=df.columns[args.ycol-1],  color=df.columns[args.colourcol-1])
 else:
-    fig = px.scatter(df, x=args.xcol, y=args.ycol)
+    fig = px.scatter(df, x=df.columns[args.xcol-1], y=df.columns[args.ycol-1], )
 if args.title:
     ftitle=dict(text=args.title, font=dict(size=50))
     fig.update_layout(title=ftitle)
 for scatter in fig.data:
     scatter['x'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['x']]
     scatter['y'] = [str(x)[:MAXLEN] + '..' if len(str(x)) > MAXLEN else x for x in scatter['y']]
-    if len(args.colourcol.strip()) == 0:
+    if args.colourcol > 0:
         sl = str(scatter['legendgroup'])
         if len(sl) > MAXLEN:
             scatter['legendgroup'] = sl[:MAXLEN]
